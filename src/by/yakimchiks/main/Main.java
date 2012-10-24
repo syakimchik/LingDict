@@ -1,5 +1,7 @@
 package by.yakimchiks.main;
 
+import java.sql.SQLException;
+
 import by.yakimchiks.window.Frame;
 
 public class Main {

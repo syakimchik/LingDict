@@ -112,7 +112,7 @@ public class Frame extends JFrame{
 		menuBar.add(createHelpMenu());
 		
 		String[] columnNames = {
-			"№", "World", "Code"	
+			"#", "World", "Code"	
 		};
 		
 		String[][] data = {

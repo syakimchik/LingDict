@@ -6,7 +6,7 @@ public class ConnectionDB {
 	private Connection connection = null;
 	private ResultSet resultSet = null;
 	private Statement statement = null;
-	private static final String url = "jdbc:sqlite:/home/gudini/Sqlite/dictionary.db";
+	private static final String url = "jdbc:sqlite:database/dictionary.sqlite";
 	
 	public ConnectionDB() {
 		// TODO Auto-generated constructor stub
