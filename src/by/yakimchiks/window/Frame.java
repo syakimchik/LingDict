@@ -7,9 +7,11 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 
 import javax.swing.*;
-import javax.swing.table.TableColumn;
+
+import by.yakimchiks.db.ConnectionDB;
 
 
 /*
@@ -36,8 +38,16 @@ public class Frame extends JFrame{
 	
 	private JLabel status;
 	
+	private String path_import_file;
+	
+	private ConnectionDB connectionDB;
+	
+	private DataTable dataTable;
+	
 	public Frame(){
 		super("Linguistic dictionary");
+		
+		connectionDB = new ConnectionDB();
 		
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
@@ -111,21 +121,33 @@ public class Frame extends JFrame{
 		menuBar.add(createEditMenu());
 		menuBar.add(createHelpMenu());
 		
-		String[] columnNames = {
-			"#", "World", "Code"	
-		};
+		dataTable = new DataTable(connectionDB);
 		
-		String[][] data = {
-				{"1", " ", " "}	
-		};
+		try {
+			table = dataTable.getTable();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.err.println("Table error:");
+			e.printStackTrace();
+		}
 		
-		table = new JTable(data, columnNames);
+		table.getColumnModel().getColumn(0).setMaxWidth(25);
+		table.getColumnModel().getColumn(0).setHeaderValue("#");
+		table.getColumnModel().getColumn(1).setHeaderValue("Word");
+		table.getColumnModel().getColumn(2).setHeaderValue("Code");
+		
+		//align text for center
+		table.getColumnModel().getColumn(0).setCellRenderer(new MyRenderer());
+		table.getColumnModel().getColumn(1).setCellRenderer(new MyRenderer());
+		table.getColumnModel().getColumn(2).setCellRenderer(new MyRenderer());
+		
+		table.setEnabled(false);
 		
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		
 		JScrollPane scrollPane = new JScrollPane(table);
 		
-		status = new JLabel("Readdy");
+		status = new JLabel("Ready");
 		status.setBorder(BorderFactory.createEmptyBorder());
 		
 		content.add(scrollPane);
@@ -142,6 +164,33 @@ public class Frame extends JFrame{
 	 */
 	private JMenu createFileMenu(){
 		JMenu file = new JMenu("File");
+		
+		JMenuItem importItem = new JMenuItem(new AbstractAction() {
+			
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				JFileChooser fileDialog = new JFileChooser("D:\\Projects\\Java\\LingDict\\dictionary");
+				int openChoice = fileDialog.showOpenDialog(content);
+				if(openChoice==JFileChooser.APPROVE_OPTION){
+					File openFile = fileDialog.getSelectedFile();
+					path_import_file = openFile.getPath();
+					connectionDB.AddRecordsToDataBase(path_import_file);
+					
+					status.setText("Imported data to database");
+					
+					update_table();
+				}
+			}
+		});
+		
+		importItem.setText("Import");
+		
 		JMenuItem exitItem = new JMenuItem(new AbstractAction() {
 			
 			/**
@@ -165,6 +214,8 @@ public class Frame extends JFrame{
 		
 		exitItem.setText("Exit");
 		
+		file.add(importItem);
+		file.addSeparator();
 		file.add(exitItem);
 		
 		return file;
@@ -191,5 +242,14 @@ public class Frame extends JFrame{
 		edit.add(searchRecord);
 		edit.add(sortRecord);
 		return edit;
+	}
+	
+	private void update_table(){
+		try {
+			table.setModel(dataTable.getModel());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

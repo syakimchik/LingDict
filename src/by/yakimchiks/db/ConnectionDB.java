@@ -1,5 +1,8 @@
 package by.yakimchiks.db;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 
 public class ConnectionDB {
@@ -21,15 +24,38 @@ public class ConnectionDB {
 		}
 	}
 	
-	public void connect(){
-		
+	public void AddRecordsToDataBase(String path_file){
+		try{
+			BufferedReader in = new BufferedReader(new FileReader(path_file));
+			String str;
+			while((str = in.readLine())!=null){
+				int k = str.indexOf(' ');
+				String word = str.substring(0, k);
+				String code = str.substring(k+1, str.length());
+				try{
+					statement.execute("INSERT INTO words ( word_name,code ) VALUES ('"+word+"','"+code+"' );");
+				}
+				catch (SQLException e) {
+					// TODO: handle exception
+					System.err.println("SQL error:");
+					e.printStackTrace();
+				}
+			}
+			in.close();
+		}
+		catch (IOException e) {
+			// TODO: handle exception
+			System.err.println("Error: properties");
+			e.printStackTrace();
+		}
 	}
 	
-	public void execSql() throws SQLException{
-		resultSet = statement.executeQuery("select Name from my");
-		
-		while(resultSet.next()){
-			System.out.println("Name "+resultSet.getString("Name"));
-		}
+	public Statement getStatement(){
+		return statement;
+	}
+	
+	public ResultSet execSql(String query) throws SQLException{
+		resultSet = statement.executeQuery(query);
+		return resultSet;
 	}
 }
